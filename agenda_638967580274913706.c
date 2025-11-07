@@ -145,6 +145,61 @@ void alterar()
 	}
 	fclose(arquivo);
 }
+void excluir()
+{
+	FILE *arquivo;
+	CONTATO ctt;
+	int pos;
+	char nome[30];
+	arquivo=fopen("agenda.bin","rb");
+	if(arquivo==NULL)
+		printf("Erro no arquivo");
+	else
+	{
+		printf("\nInformer o nome a excluir:"); fflush(stdin);
+		gets(nome);
+		if(stricmp(nome,"\0")!=0)
+		{
+			pos=busca(arquivo,nome);
+			if(pos== -1)
+				printf("\nRegistro não encontrado");
+			else
+			{
+				fseek(arquivo,pos,0);
+				fread(&ctt,sizeof(CONTATO),1,arquivo);
+				printf("\nNome: %s",ctt.nome);
+				printf("\nTelefone: %s",ctt.fone);
+				printf("\nEmail: %s",ctt.email);
+				printf("\nAniversario: %d/%d/%d",ctt.aniv.d,ctt.aniv.m,ctt.aniv.a);
+				printf("\nDeseja Excluir S/N?");
+				
+				if(toupper(getche())=='S')
+					{
+						FILE *temp;
+						temp=fopen("temp.bin","wb");
+						if(temp==NULL)
+							printf("Erro no Arquivo");
+						else
+						{
+							rewind(arquivo);
+							fread(&ctt,sizeof(CONTATO),1,arquivo);
+							while(!feof(arquivo))
+							{
+								if(strcmp(nome,ctt.nome)!=0)
+									fwrite(&ctt,sizeof(CONTATO),1,temp);
+								fread(&ctt,sizeof(CONTATO),1,arquivo);
+							}
+						}
+						fclose(arquivo);
+						fclose(temp);
+						remove("agenda.bin");
+						rename("temp.bin","agenda.bin");
+					}
+			}
+		}
+	}
+	fclose(arquivo);
+}
 main()
 {
 	int opc;
@@ -158,7 +213,7 @@ main()
 			     break;
 		    case 3:alterar();
 			     break;
-		    case 4: //excluir();
+		    case 4:excluir();
 			     break;
 			case 5:printf("Encerrando a agenda...");
 			     break;
